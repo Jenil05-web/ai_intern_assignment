@@ -1,6 +1,7 @@
 # Conversation RAG + Persona Chatbot
 
-![App Screenshot](screenshot.png)
+<img width="1919" height="978" alt="image" src="https://github.com/user-attachments/assets/fb75abc7-5fd0-4c71-8fee-8b133463a622" />
+
 
 A small AI system I built as part of an internship assignment. The idea was to take a dataset of conversations, understand what kind of person User 1 is, and then be able to answer questions about them using a chatbot.
 
