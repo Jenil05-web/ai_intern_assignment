@@ -1,7 +1,7 @@
 # Conversation RAG + Persona Chatbot
 
 A small AI system I built as part of an internship assignment. The idea was to take a dataset of conversations, understand what kind of person User 1 is, and then be able to answer questions about them using a chatbot.
-
+streamlit live hosting link : https://aiinternassignment-gatobetyhdbjgyyzftztpw.streamlit.app/
 ---
 
 ## What it does
