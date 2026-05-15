@@ -3,4 +3,8 @@ faiss-cpu
 numpy
 pandas
 streamlit
+transformers
+torch
+scikit-learn
  
+
