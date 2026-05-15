@@ -91,6 +91,66 @@ User messages:
     }
 
 
+def detect_persona_drift(conversations: list[str]) -> list[dict]:
+    """
+    Part 1: Persona Drift Detector.
+    Treats each conversation as a time unit (day).
+    Extracts tone + mood via GPT-3.5, then flags where drift happened and what triggered it.
+    Returns a timeline: [{day, tone, mood, trigger, drifted, summary}]
+    """
+    timeline = []
+
+    for day_num, convo in enumerate(conversations, start=1):
+        user1_lines = [
+            line[7:].strip()
+            for line in convo.strip().split("\n")
+            if line.strip().startswith("User 1:")
+        ]
+        if not user1_lines:
+            continue
+
+        sample = "\n".join(user1_lines[:30])
+        prompt = f"""Read these messages and return ONLY a JSON object with these keys:
+{{
+  "tone": "one word: casual / formal / aggressive / warm / cold / playful",
+  "mood": "one word: happy / frustrated / curious / sad / anxious / neutral / excited",
+  "trigger": "short phrase (max 8 words) — what topic or event seems to drive this tone",
+  "summary": "one sentence describing the overall vibe"
+}}
+
+Messages:
+{sample}"""
+
+        try:
+            resp = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=150,
+                temperature=0.2,
+            )
+            raw   = resp.choices[0].message.content.strip()
+            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            data  = json.loads(match.group()) if match else {}
+        except Exception:
+            data = {}
+
+        timeline.append({
+            "day":     day_num,
+            "tone":    data.get("tone", "unknown"),
+            "mood":    data.get("mood", "unknown"),
+            "trigger": data.get("trigger", "general conversation"),
+            "summary": data.get("summary", ""),
+            "drifted": False,
+        })
+
+    # Flag drifts where tone or mood changed from previous entry
+    for i in range(1, len(timeline)):
+        prev, curr = timeline[i - 1], timeline[i]
+        curr["drifted"] = (prev["tone"] != curr["tone"]) or (prev["mood"] != curr["mood"])
+
+    return timeline
+
+
 def merge_personas(personas: list[dict]) -> dict:
     """Aggregate persona dicts from multiple conversations."""
     from collections import Counter

@@ -1,0 +1,82 @@
+[
+  {
+    "day": 1,
+    "tone": "warm",
+    "mood": "excited",
+    "trigger": "moving to Portland, pursuing culinary dreams",
+    "summary": "Excited and positive conversation about moving to Portland and pursuing culinary dreams",
+    "drifted": false
+  },
+  {
+    "day": 2,
+    "tone": "casual",
+    "mood": "happy",
+    "trigger": "conversation about hobbies and interests",
+    "summary": "Positive and upbeat exchange about personal interests and activities",
+    "drifted": true
+  },
+  {
+    "day": 3,
+    "tone": "warm",
+    "mood": "friendly",
+    "trigger": "casual conversation",
+    "summary": "A friendly and warm conversation about hobbies and pets.",
+    "drifted": true
+  },
+  {
+    "day": 4,
+    "tone": "casual",
+    "mood": "happy",
+    "trigger": "hiking in the Everglades",
+    "summary": "Positive and enthusiastic conversation about hiking and favorite books",
+    "drifted": true
+  },
+  {
+    "day": 5,
+    "tone": "warm",
+    "mood": "excited",
+    "trigger": "new job",
+    "summary": "Encouraging and supportive conversation about new opportunities",
+    "drifted": true
+  },
+  {
+    "day": 6,
+    "tone": "casual",
+    "mood": "happy",
+    "trigger": "talking about hobbies and interests",
+    "summary": "Friendly and upbeat conversation about personal interests and experiences",
+    "drifted": true
+  },
+  {
+    "day": 7,
+    "tone": "casual",
+    "mood": "happy",
+    "trigger": "talking about favorite things",
+    "summary": "Friendly and upbeat conversation about personal interests",
+    "drifted": false
+  },
+  {
+    "day": 8,
+    "tone": "warm",
+    "mood": "happy",
+    "trigger": "conversation about hobbies and interests",
+    "summary": "Friendly and enthusiastic interaction between two people with shared interests",
+    "drifted": true
+  },
+  {
+    "day": 9,
+    "tone": "warm",
+    "mood": "happy",
+    "trigger": "conversation about studies and future goals",
+    "summary": "Supportive and positive interaction between friends discussing their aspirations",
+    "drifted": false
+  },
+  {
+    "day": 10,
+    "tone": "warm",
+    "mood": "happy",
+    "trigger": "cooking and family",
+    "summary": "Friendly and inviting conversation about cooking and family life.",
+    "drifted": false
+  }
+]

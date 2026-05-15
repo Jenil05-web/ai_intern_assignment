@@ -7,6 +7,7 @@ rag.py — RAG system using:
 """
 
 import os
+import re
 import json
 import numpy as np
 import faiss
@@ -166,3 +167,69 @@ class RAGIndex:
         with open(f"{prefix}.json") as f:
             self.metadata = json.load(f)
         print(f"Loaded {self.index.ntotal} vectors from {prefix}")
+
+    def resolve_conflict(self, question: str, top_k: int = 6) -> dict:
+        """
+        Part 3: Conflict Resolver.
+        Retrieves top_k chunks, re-ranks by recency + emotional weight,
+        flags contradictions, then merges into a single GPT answer.
+        """
+        raw_results = self.query(question, top_k=top_k)
+        if not raw_results:
+            return {"answer": "No relevant context found.", "contradictions_found": False, "ranked_chunks": []}
+
+        # Recency score: extract highest number from label (later = more recent)
+        def recency_score(label):
+            nums = re.findall(r"\d+", label)
+            return float(nums[-1]) if nums else 0.0
+
+        max_rec = max(recency_score(r["label"]) for r in raw_results) or 1.0
+
+        # Emotional weight: count emotional keywords in summary
+        EMOTIONAL = {"fight","argument","angry","upset","happy","excited",
+                     "sad","miss","love","hate","worried","scared","proud"}
+        def emotion_score(summary):
+            return min(len(set(summary.lower().split()) & EMOTIONAL) / 5.0, 1.0)
+
+        # Final score = 50% similarity + 30% recency + 20% emotion
+        for r in raw_results:
+            r["recency"]     = recency_score(r["label"]) / max_rec
+            r["emotion"]     = emotion_score(r["summary"])
+            r["final_score"] = 0.5*r["score"] + 0.3*r["recency"] + 0.2*r["emotion"]
+
+        ranked = sorted(raw_results, key=lambda x: x["final_score"], reverse=True)
+
+        # Contradiction detection: opposing sentiment words across top chunks
+        POS = {"happy","excited","great","love","proud","well","good"}
+        NEG = {"fight","angry","upset","sad","hate","worried","bad","miss"}
+        sentiments = []
+        for r in ranked[:4]:
+            words = set(r["summary"].lower().split())
+            if words & POS and not words & NEG:    sentiments.append("positive")
+            elif words & NEG and not words & POS:  sentiments.append("negative")
+            else:                                   sentiments.append("mixed")
+
+        contradictions_found = len(set(sentiments)) > 1
+
+        context = "\n".join(
+            f"[{r['label']} | score {r['final_score']:.2f}]: {r['summary']}"
+            for r in ranked[:4]
+        )
+        conflict_note = (
+            "These chunks seem contradictory — briefly acknowledge this in your answer."
+            if contradictions_found else ""
+        )
+
+        resp = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content":
+                f'User asked: "{question}"\n\nContext:\n{context}\n\n{conflict_note}\n\nAnswer in 2-3 sentences.'}],
+            max_tokens=200,
+            temperature=0.3,
+        )
+
+        return {
+            "answer":               resp.choices[0].message.content.strip(),
+            "contradictions_found": contradictions_found,
+            "ranked_chunks":        ranked[:4],
+        }
